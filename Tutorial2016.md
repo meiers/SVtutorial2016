@@ -122,29 +122,18 @@ Importantly, there should be a **read group** (`@RG`) with a sample name (`SM`) 
 
 <details> 
   <summary>**Excercise**: Is this a full human genome data set?</summary>
-> Only 20Mb on chromosome X (column 3 and 4).
 </details>
 
 <details> 
   <summary>**Excercise**: What is the read length used?</summary>
-> Column 10 shows the sequenced read, it's a 100bp in the 
-> tumor and 125bp in the control. This is also reported by 
-> stats (e.g. `less tu.stats`).
 </details>
 
 <details> 
   <summary>**Excercise**: Check the sample names</summary>
-> They are *tu* and *wt*.
 </details>
 
 <details> 
   <summary>**Excercise**: By looking at the header lines, can you find out which version of the human reference genome reads were aligned against?</summary>
-> The `@PG` line gives some information on the program 
-> used to map reads. From that line you can identify 
-> the reference genome called `hs37d5.fasta`, which 
-> stands for *homo sapiens* assembly 37, version 5 
-> and is the referene genome used in the 
-> [1000 Genomes project](http://www.internationalgenome.org/).
 </details>
 
 ### Alignment statistics
@@ -208,15 +197,6 @@ You can save the R session to reuse it later.
 
 <details> 
   <summary>**Excercise**: Why is the comparison plot never at 0, meaning no copy number change between tumor and control?</summary>
-> As you see in the code normalizaiton depends on the median 
-> coverage of both samples - this is meant to correct for 
-> different sequencing coverages in the two samples. 
-> 
-> We have selected a small region 
-> of the chromosome with many copy changes, so likely the 
-> median is already not a good proxy for average coverage 
-> of the chromosome. Thus it is most likely a technical 
-> problem, not biology.
 </details>
 
 
@@ -267,21 +247,10 @@ Columns from 9 are *optional*. Column 9 declares the format of all entries in co
 
 <details> 
   <summary>**Excercise**: Pick a precise deletion and [blat](https://genome.ucsc.edu/cgi-bin/hgBlat?command=start) the consensus sequence</summary>
-> The consesus sequence is assembled from reads mapping across 
-> the breakpoints of the SV. If you pick one for a deletion 
-> call (see `CONSESUS` field in column 8) and enter it into 
-> Blat you should see the two halfs of it mapping further 
-> apart. If coding sequences were affected we could detect 
-> frameshifts this way.
 </details>
 
 <details> 
   <summary>**Excercise**: Can you already determine from the sample columns which SVs are **somatic**?</summary>
-> The simple way is to check the genotype (`GT`) fields for both 
-> sample - if a call is present (0/1 or 1/1) in the tumor, 
-> but not (0/0) in the control, it is a somatic variant. 
-> The Delly filter script is more advanced and applies 
-> additional criteria on number of supporting reads.
 </details>
 
 ### Somatic filtering
