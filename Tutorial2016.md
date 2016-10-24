@@ -7,7 +7,7 @@ This tutorial provides a short introduction into **structural variant** detectio
 In this practical we will analyse large (in the sense of structural) genetic variation in a cancer patient's genome. 
 
 DNA from a cancer cell line derived from a tumor was isolated as well as from blood (as control sample), processed with a whole-genome sequencing paired-reads protocol and sequenced on an Illumina sequencer.
-During the practical you will be guided through some typical analysis steps:
+During the practical you will be guided through some typical analysis steps:
 
  * Setting up the software
  * Raw sequencing data & QC
@@ -18,8 +18,6 @@ DNA from a cancer cell line derived from a tumor was isolated as well as from bl
 ## Setting up the software
 
 Luckily, nearly all the software we are going to need is pre-packaged in a [Docker](https://www.docker.com/) image. This saves you the effort to run through a lot of installation processes and solves all dependecy issues (except, of course, Docker itself).
-
-![docker](https://www.docker.com/sites/default/files/legal/small_h-dark.png)
 
 ### Installing Docker on Linux
 
