@@ -14,6 +14,7 @@ During the practical you will be guided through some typical analysis steps:
  * Read depth analysis
  * SV calling with Delly
  * Visualization of SV calls
+ * Bi-allelic frequency
 
 ## Setting up the software
 
@@ -151,11 +152,11 @@ There are some general things to watch out for such as mapping percentages below
 One important QC step for paired-end sequencing data is to check the insert size (i.e. fragment length) distribution, which is given in column 8 of the *bam* file. Delly ships with a tool called [stats](https://github.com/tobiasrausch/bamstats) that does the work for us. It also provides an R script to visualize the results:
 
 ```
-$ stats -o tu.stats -i tu.ins tu.bam
-$ Rscript /opt/delly/R/isize.R tu.ins
-$ stats -o wt.stats -i wt.ins wt.bam
-$ Rscript /opt/delly/R/isize.R wt.ins
-$ mv *.ins.png host/
+stats -o tu.stats -i tu.ins tu.bam
+Rscript /opt/delly/R/isize.R tu.ins
+stats -o wt.stats -i wt.ins wt.bam
+Rscript /opt/delly/R/isize.R wt.ins
+mv *.ins.png host/
 ```
 
 Note that we sent the output plots to the special `host` folder, so they should appear in your `mount` folder on the computer. What do they tell you?
@@ -337,12 +338,73 @@ ggsave("host/cov3.pdf", width=9, height=3)
 
 ![cov1](fig/cov3.png)
 
+## Bi-allelic frequency
+
+In the last part we wish to augment our coverage plot with bi-allelic frequency information on heterozygous SNPs. 
+
+To that end would have to know the SNPs of our indiviual patient, either from SNP calling or by looking at known SNP sites from the 1000 Genomes Project that our patient is a heterozygous carrier of.
+
+We provide known SNP positions in the file `snps.pos`.
+
+We will count allelic depth (number of reads supporting alternative and reference allele) using samtools and bcftools:
+
+```
+samtools mpileup -go mp.bcf -f chrX.fa -t AD -l snps.pos tu.bam wt.bam
+bcftools call -vmAO z -o mp.vcf.gz mp.bcf
+```
+With `less -S mp.vcf.gz` you can have a look at the created vcf file.
+
+<details> 
+  <summary>**Excercise**: Look up the VCF header to find 
+  out where the allelic counts are.</summary>
+</details>
+
+For your convenience you can use the following command line to extract the counts into a table, with columns 4/5 being ref/alt counts for the tumor, 6/7 for the control:
+
+```
+zcat mp.vcf.gz | grep -v "^#" | cut -f 1,2,10,11  | sed 's/[^\t]*://g' | sed 's/,/\t/g' | awk 'NF==6' > ad.tsv
+```
+Finally, let's go to our R session and plot the bi-allelic frequency:
+
+```
+library(ggplot2)
+library(reshape2)
+library(scales)
+co = read.table("ad.tsv", header=F)
+co$tu = co$V4/(co$V3+co$V4)
+co$wt = co$V5/(co$V5+co$V6)
+co = co[,c(2,7,8)]
+com = melt(co, "V2", variable.name = "sample", value.name="freq")
+p4 = ggplot(com) + aes(V2, freq, col = sample) + geom_point(alpha=0.4, size=0.5)
+ggsave("host/freq.pdf", width=9, height=3)
+```
+
+<details> 
+  <summary>**Excercise**: What does this tell you about copy number states?</summary>
+</details>
+
+In case you still have the coverage plot `p3` in your session you can combine both plots like this:
+
+```
+library(grid)
+	grid.newpage()
+	pdf("host/combi.pdf", width=9, height=8)
+	pushViewport(viewport(layout=grid.layout(6,1)))
+	print(p3 + theme(legend.position="bottom"), 
+		   vp = viewport(layout.pos.row=1:3, layout.pos.col=1))
+	print(p4 + theme(legend.position="bottom"),
+		   vp = viewport(layout.pos.row=4:6, layout.pos.col=1))
+	dev.off()
+```
+
 
 ## Appendix: Software
 
 #### Packaged in the Docker image
 
+* [R](https://cran.r-project.org/) 3.3.1
 * [samtools](https://github.com/samtools/samtools) 1.3.1: Handle *sam/bam/cram* files
+* [bcftools](https://github.com/samtools/bcftools) 1.3.1: Handle *bcf/vcf* files
 * [stats](https://github.com/tobiasrausch/bamstats) 0.7.3: Insert size statistics from paired-end sequencing data
 * cov: calculate genome coverage. Part of Delly.
 * [DNAcopy](http://bioconductor.org/packages/release/bioc/html/DNAcopy.html): Segmentation
