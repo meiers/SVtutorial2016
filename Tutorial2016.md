@@ -397,6 +397,7 @@ library(grid)
 	dev.off()
 ```
 
+![combi](fig/combi.png)
 
 ## Appendix: Software
 
